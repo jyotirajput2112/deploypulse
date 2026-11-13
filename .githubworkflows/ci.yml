@@ -28,3 +28,12 @@ jobs:
 
     - name: Build Docker image
       run: docker build -t deploypulse:latest .
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'deploypulse:latest'
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+        severity: 'CRITICAL,HIGH'
