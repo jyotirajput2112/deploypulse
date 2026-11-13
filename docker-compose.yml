@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: deploypulse-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: deploypulse
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: deploypulse-app
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/deploypulse
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
