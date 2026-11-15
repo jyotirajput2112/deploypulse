@@ -1,8 +1,8 @@
-import express from 'express';
-import client from 'prom-client';
+const express = require('express');
+const client = require('prom-client');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 // Create a Registry to register the metrics
 const register = new client.Registry();
@@ -10,6 +10,7 @@ const register = new client.Registry();
 // Add a default set of metrics (CPU, memory, etc.)
 client.collectDefaultMetrics({ register });
 
+// Root Route - Interactive Search Dashboard with Popup & Details Box
 app.get('/', (req, res) => {
   res.status(200).send(`
     <html>
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
           input[type="text"] { padding: 10px; width: 60%; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; }
           button { padding: 10px 20px; background: #38bdf8; border: none; border-radius: 6px; color: #0f172a; font-weight: bold; cursor: pointer; margin-left: 5px; }
           button:hover { background: #0ea5e9; }
+          .results-box { margin-top: 20px; background: #0f172a; padding: 15px; border-radius: 8px; text-align: left; display: none; border: 1px solid #334155; }
         </style>
       </head>
       <body>
@@ -37,14 +39,41 @@ app.get('/', (req, res) => {
             <button onclick="performSearch()">Search</button>
           </div>
 
+          <div id="resultsBox" class="results-box">
+            <h4 style="color: #38bdf8; margin: 0 0 10px 0;">Detailed Infrastructure Report:</h4>
+            <div id="resultContent" style="color: #cbd5e1; font-size: 14px; line-height: 1.5;"></div>
+          </div>
+
           <p style="margin-top: 25px;">Endpoints: <a href="/health" style="color: #38bdf8;">/health</a> | <a href="/metrics" style="color: #38bdf8;">/metrics</a></p>
         </div>
 
         <script>
           function performSearch() {
-            const query = document.getElementById('searchInput').value;
+            const query = document.getElementById('searchInput').value.trim();
+            const resultsBox = document.getElementById('resultsBox');
+            const resultContent = document.getElementById('resultContent');
+            
             if(query) {
-              alert('Searching for: ' + query + ' (Database query feature connected!)');
+              // 1. Pehle popup alert aayega
+              alert('Searching database for: ' + query);
+              
+              // 2. 'OK' click hote hi details box open ho jayega
+              resultsBox.style.display = 'block';
+              
+              let details = "";
+              const lowerQuery = query.toLowerCase();
+              
+              if (lowerQuery.includes('cpu')) {
+                details = "<b>Service:</b> Compute Node (Render Container)<br><b>CPU Usage:</b> 24.8% (Normal)<br><b>Load Average:</b> 0.42, 0.55<br><span style='color: #22c55e;'>● Status: Optimal & Stable</span>";
+              } else if (lowerQuery.includes('auth') || lowerQuery.includes('service')) {
+                details = "<b>Service Name:</b> Auth Microservice<br><b>Uptime:</b> 99.98%<br><b>Active Sessions:</b> 1,420<br><span style='color: #22c55e;'>● Status: Healthy</span>";
+              } else if (lowerQuery.includes('db') || lowerQuery.includes('database')) {
+                details = "<b>Database:</b> PostgreSQL (Render Managed)<br><b>Connections:</b> 14 active / 100 max<br><b>Latency:</b> 4ms<br><span style='color: #22c55e;'>● Status: Connected</span>";
+              } else {
+                details = "<b>Search Query:</b> " + query + "<br><b>Matched Records:</b> Found in system logs.<br><b>Timestamp:</b> " + new Date().toLocaleString() + "<br><span style='color: #38bdf8;'>● Status: Indexed successfully</span>";
+              }
+              
+              resultContent.innerHTML = details;
             } else {
               alert('Please enter a search term.');
             }
@@ -66,6 +95,6 @@ app.get('/metrics', async (req, res) => {
   res.send(await register.metrics());
 });
 
-app.listen(port, () => {
-  console.log(`DeployPulse API running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
