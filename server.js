@@ -1,5 +1,5 @@
-const express = require('express');
-const client = require('prom-client');
+import express from 'express';
+import client from 'prom-client';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,10 +54,7 @@ app.get('/', (req, res) => {
             const resultContent = document.getElementById('resultContent');
             
             if(query) {
-              // 1. Pehle popup alert aayega
               alert('Searching database for: ' + query);
-              
-              // 2. 'OK' click hote hi details box open ho jayega
               resultsBox.style.display = 'block';
               
               let details = "";
