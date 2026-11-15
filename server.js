@@ -10,6 +10,10 @@ const register = new client.Registry();
 // Add a default set of metrics (CPU, memory, etc.)
 client.collectDefaultMetrics({ register });
 
+app.get('/', (req, res) => {
+  res.status(200).send('Welcome to DeployPulse API - Running successfully on Render!');
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', database: 'Connected' });
